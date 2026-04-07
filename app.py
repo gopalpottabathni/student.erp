@@ -39,13 +39,21 @@ def smart_parse(row):
         try:
             val = row[i]
 
-            if isinstance(val, str) and any(char.isdigit() for char in val):
+            # Detect subject code like 25MAT1001
+            if isinstance(val, str) and val.startswith("25"):
 
                 subject = row[i+1] if i+1 < len(row) else None
                 marks = row[i+5] if i+5 < len(row) else None
 
                 if isinstance(marks, (int, float)):
                     subjects.append((subject, marks))
+
+                elif isinstance(marks, str):
+                    try:
+                        marks = float(marks)
+                        subjects.append((subject, marks))
+                    except:
+                        continue
 
         except:
             continue
@@ -84,6 +92,7 @@ def upload():
                 )
 
                 subjects = smart_parse(row)
+                print("Subjects found:", subjects)
 
                 for sub, marks in subjects:
                     conn.execute(
