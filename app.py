@@ -26,11 +26,11 @@ def init_db():
     conn.commit()
     conn.close()
 
-# 🔥 IMPORTANT: Run on startup (for Render)
+# 🔥 Run DB init on startup (important for Render)
 init_db()
 
 
-# ✅ Safe subject parser
+# ✅ Smart subject parser
 def smart_parse(row):
     subjects = []
     row = list(row)
@@ -39,7 +39,6 @@ def smart_parse(row):
         try:
             val = row[i]
 
-            # Detect subject code like 25MAT1001
             if isinstance(val, str) and val.startswith("25"):
 
                 subject = row[i+1] if i+1 < len(row) else None
@@ -74,21 +73,23 @@ def upload():
     try:
         file = request.files["file"]
 
-        # ✅ Memory-safe Excel read
         df = pd.read_excel(file, engine="openpyxl", nrows=500)
         print("COLUMNS:", df.columns)
+
         df = df.fillna("")
 
         conn = sqlite3.connect(DB)
 
         for _, row in df.iterrows():
             try:
-               urn = str(row.get("URN", "")).strip()
-               name = str(row.get("Name", "")).strip()
-               course = str(row.get("Course", "")).strip()
+                # ✅ SAFE COLUMN ACCESS
+                urn = str(row.get("URN", "")).strip()
+                name = str(row.get("Name", "")).strip()
+                course = str(row.get("Course", "")).strip()
 
-               if not urn:
-               continue
+                # ✅ FIXED INDENTATION
+                if not urn:
+                    continue
 
                 conn.execute(
                     "INSERT OR IGNORE INTO students VALUES (?,?,?)",
@@ -150,6 +151,6 @@ def dashboard():
     return render_template("dashboard.html", data=data)
 
 
-# ✅ Correct run block (local only)
+# ✅ Run locally only
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
