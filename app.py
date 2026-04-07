@@ -76,15 +76,19 @@ def upload():
 
         # ✅ Memory-safe Excel read
         df = pd.read_excel(file, engine="openpyxl", nrows=500)
+        print("COLUMNS:", df.columns)
         df = df.fillna("")
 
         conn = sqlite3.connect(DB)
 
         for _, row in df.iterrows():
             try:
-                urn = str(row[2])
-                name = row[1]
-                course = row[3]
+               urn = str(row.get("URN", "")).strip()
+               name = str(row.get("Name", "")).strip()
+               course = str(row.get("Course", "")).strip()
+
+               if not urn:
+               continue
 
                 conn.execute(
                     "INSERT OR IGNORE INTO students VALUES (?,?,?)",
