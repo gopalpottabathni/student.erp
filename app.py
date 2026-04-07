@@ -3,7 +3,8 @@ from flask import Flask, render_template, request, redirect
 import pandas as pd
 import sqlite3
 
-app = Flask(__name__)
+import os
+app = Flask(__name__, template_folder=os.path.join(os.getcwd(), "templates"))
 DB = "erp.db"
 
 def init_db():
