@@ -26,31 +26,28 @@ def init_db():
     conn.commit()
     conn.close()
 
-# 🔥 Run DB init on startup (important for Render)
+# 🔥 Run DB init on startup
 init_db()
 
 
-# ✅ Smart subject parser
-def smart_parse(row):
+# ✅ NEW CORRECT SUBJECT EXTRACTION (FINAL FIX)
+def extract_subjects(row):
     subjects = []
-    row = list(row)
 
-    for i in range(len(row)):
+    for col in row.index:
         try:
-            val = row[i]
-
-            if isinstance(val, str) and val.startswith("25"):
-
-                subject = row[i+1] if i+1 < len(row) else None
-                marks = row[i+5] if i+5 < len(row) else None
+            # detect subject columns like 25MAT1001
+            if isinstance(col, str) and col.startswith("25"):
+                subject_name = col
+                marks = row[col]
 
                 if isinstance(marks, (int, float)):
-                    subjects.append((subject, marks))
+                    subjects.append((subject_name, marks))
 
                 elif isinstance(marks, str):
                     try:
                         marks = float(marks)
-                        subjects.append((subject, marks))
+                        subjects.append((subject_name, marks))
                     except:
                         continue
 
@@ -82,12 +79,10 @@ def upload():
 
         for _, row in df.iterrows():
             try:
-                # ✅ SAFE COLUMN ACCESS
                 urn = str(row.get("URN", "")).strip()
                 name = str(row.get("Name", "")).strip()
                 course = str(row.get("Course", "")).strip()
 
-                # ✅ FIXED INDENTATION
                 if not urn:
                     continue
 
@@ -96,7 +91,8 @@ def upload():
                     (urn, name, course)
                 )
 
-                subjects = smart_parse(row)
+                # ✅ USE NEW FUNCTION HERE
+                subjects = extract_subjects(row)
                 print("Subjects found:", subjects)
 
                 for sub, marks in subjects:
@@ -151,6 +147,5 @@ def dashboard():
     return render_template("dashboard.html", data=data)
 
 
-# ✅ Run locally only
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
