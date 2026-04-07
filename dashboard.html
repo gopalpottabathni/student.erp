@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="font-family:Arial;background:#f4f6f9;">
+
+<h2 style="text-align:center;">Analytics Dashboard</h2>
+
+<canvas id="chart" width="400" height="200"></canvas>
+
+<table border="1" style="margin:auto;background:white;">
+<tr><th>URN</th><th>Avg Marks</th><th>Status</th></tr>
+{% for row in data %}
+<tr>
+<td>{{row.urn}}</td>
+<td>{{row.marks}}</td>
+<td>{{row.insight}}</td>
+</tr>
+{% endfor %}
+</table>
+
+<script>
+var ctx = document.getElementById('chart');
+var chart = new Chart(ctx, {
+type: 'bar',
+data: {
+labels: [{% for row in data %}'{{row.urn}}',{% endfor %}],
+datasets: [{
+label: 'Marks',
+data: [{% for row in data %}{{row.marks}},{% endfor %}]
+}]
+}
+});
+</script>
+
+</body>
+</html>
